@@ -1,13 +1,15 @@
-import "./App.css";
 import React, { Component } from "react";
-import navigation from "./Components/Navigation/navigation";
+import Navigation from "./Components/Navigation/Navigation";
+import Logo from "./Components/Logo/Logo";
+import "./App.css";
 
 class App extends Component {
   render() {
     return (
       <div classname="App">
-        <navigation />
-        {/* { <Logo />
+        <Navigation />
+        <Logo />
+        {/* { 
         <ImageLink />
         <FaceRecognition />} */}
       </div>
