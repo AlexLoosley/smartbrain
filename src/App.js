@@ -5,10 +5,11 @@ import ImageLink from "./Components/ImageLink/ImageLink";
 import Rank from "./Components/Rank/Rank";
 import Particles from "react-particles-js";
 import "./App.css";
+import FaceRecognition from "./Components/FaceRecognition/FaceRecognition";
 import Clarifai from "clarifai";
 
 const app = new Clarifai.App({
-  apiKey: "c28cb2b6c84a4de6997a526c83d9db8d",
+  apiKey: "xxxxxxxxx",
 });
 
 const particlesOption = {
@@ -28,21 +29,42 @@ class App extends Component {
     super();
     this.state = {
       input: "",
+      imageUrl: "",
+      box: {},
     };
   }
 
+  calculateFaceLocation = (data) => {
+    const clarifaiFace =
+      data.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById("inputimage");
+    const width = image.width;
+    const height = image.height;
+    console.log(width, height);
+    return {
+      leftCol: clarifaiFace.left_col * width,
+      topRow: clarifaiFace.top_row * height,
+      rightCol: width - clarifaiFace.right_col * width,
+      bottomRow: height - clarifaiFace.bottom_row * height,
+    };
+  };
+
+  displayFaceBox = (box) => {
+    console.log(box);
+    this.setState({ box });
+  };
+
   onInputChange = (event) => {
-    console.log(event.target.value);
+    this.setState({ input: event.target.value });
   };
 
   onButtonSubmit = () => {
-    console.log("click");
+    this.setState({ imageUrl: this.state.input });
     app.models
-      .predict(
-        Clarifai.FACE_DETECT_MODEL,
-        "https://upload.wikimedia.org/wikipedia/commons/a/a9/Tom_Hanks_TIFF_2019.jpg"
+      .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+      .then((response) =>
+        this.displayFaceBox(this.calculateFaceLocation(response))
       )
-      .then((response) => console.log(response))
       .catch((err) => console.log(err));
   };
 
@@ -57,8 +79,7 @@ class App extends Component {
           onInputChange={this.onInputChange}
           onButtonSubmit={this.onButtonSubmit}
         />
-        {/* { 
-        <FaceRecognition />} */}
+        <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} />
       </div>
     );
   }
